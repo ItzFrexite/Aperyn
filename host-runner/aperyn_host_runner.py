@@ -4,6 +4,7 @@ import json, os, socket, subprocess, sys
 from pathlib import Path
 
 CONFIG = Path('/etc/aperyn-host-runner/config.json')
+SOCKET_PATH = Path('/var/lib/aperyn-host-runner/runner.sock')
 # These are direct developer tools only—not a shell or generic host-command
 # API. Additions require a source review and a release, rather than accepting a
 # browser-supplied program name.
@@ -42,13 +43,20 @@ def run(request):
     return {'code':result.returncode,'stdout':result.stdout[-1_000_000:],'stderr':result.stderr[-1_000_000:]}
 
 def serve():
-    sock=socket.socket(fileno=3)
-    while True:
-        conn,_=sock.accept()
-        with conn:
-            try:
-                raw=conn.recv(1_100_000); response={'ok':True,**run(json.loads(raw))}
-            except Exception as exc: response={'ok':False,'error':str(exc)}
-            conn.sendall(json.dumps(response).encode())
+    if SOCKET_PATH.exists() or SOCKET_PATH.is_symlink():
+        SOCKET_PATH.unlink()
+    sock=socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    try:
+        sock.bind(str(SOCKET_PATH)); os.chmod(SOCKET_PATH, 0o600); sock.listen(16)
+        while True:
+            conn,_=sock.accept()
+            with conn:
+                try:
+                    raw=conn.recv(1_100_000); response={'ok':True,**run(json.loads(raw))}
+                except Exception as exc: response={'ok':False,'error':str(exc)}
+                conn.sendall(json.dumps(response).encode())
+    finally:
+        sock.close()
+        if SOCKET_PATH.exists(): SOCKET_PATH.unlink()
 
 if __name__ == '__main__': serve()

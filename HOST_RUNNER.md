@@ -3,8 +3,8 @@
 The Host Runner lets Agent use host-installed SDKs such as `dotnet`, Python,
 Node/npm, Cargo, Java, GCC and CMake without privileging the Agent container.
 
-It is a non-root, systemd socket service. The Agent reaches it only through a
-private Unix socket. There is no TCP listener, Docker socket, host root mount,
+It is a non-root, systemd service which owns a private Unix socket. The Agent
+reaches it only through that socket. There is no TCP listener, Docker socket, host root mount,
 generic shell endpoint, or root command execution.
 
 Only fixed executable names and structured arguments are accepted. `/workspace`

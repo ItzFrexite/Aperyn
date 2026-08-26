@@ -1,14 +1,15 @@
 [Unit]
 Description=Aperyn non-root Host Runner for %i
-After=network.target
+After=local-fs.target
 
 [Service]
 User=%i
 Group=%i
 ExecStart=/usr/bin/python3 /usr/local/lib/aperyn-host-runner/aperyn_host_runner.py
-StandardInput=socket
 NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
 ReadWritePaths=/var/lib/aperyn-host-runner
 RestrictAddressFamilies=AF_UNIX
+Restart=on-failure
+RestartSec=2
