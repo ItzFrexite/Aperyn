@@ -14,7 +14,7 @@ class StaticContractTests(unittest.TestCase):
             p=Parser(); p.feed(template.read_text(encoding='utf-8'))
             for ref in p.refs: self.assertTrue((ROOT/'chat/static'/ref.removeprefix('/static/')).exists(),f'{template}: {ref}')
     def test_pwa(self):
-        sw=(ROOT/'chat/static/sw.js').read_text(); self.assertIn('aperyn-v1.27.1',sw); self.assertNotIn('22.0.0',sw)
+        sw=(ROOT/'chat/static/sw.js').read_text(); self.assertIn('aperyn-v1.27.2',sw); self.assertNotIn('22.0.0',sw)
         manifest=(ROOT/'chat/static/manifest.webmanifest').read_text(); self.assertIn('icon-192.png',manifest); self.assertIn('icon-512.png',manifest)
     def test_no_legacy_accent(self):
         bad=[]
@@ -154,7 +154,7 @@ class StaticContractTests(unittest.TestCase):
         self.assertIn('github.com/ollama-admin/ollama-admin',readme)
     def test_single_current_release_notes(self):
         notes=sorted(ROOT.glob('RELEASE_NOTES*'))
-        self.assertEqual([p.name for p in notes],['RELEASE_NOTES_V1.27.1.md'])
+        self.assertEqual([p.name for p in notes],['RELEASE_NOTES_V1.27.2.md'])
         source='\n'.join(p.read_text() for p in (ROOT/'chat/static').glob('*.css'))
         self.assertNotRegex(source,r'(?<![.\d])v(?:[1-9]|1\d|2[0-3])(?=[^.\d]|$)')
     def test_agent_ui_and_runtime_contract(self):
