@@ -117,7 +117,7 @@ if printf '%s' "$tags" | jq -e '.models | type == "array"' >/dev/null 2>&1; then
           "git status": "allow", "git status *": "allow"
         },
         edit: "ask", write: "ask", task: "ask",
-        webfetch: "ask", websearch: "ask", external_directory: "deny"
+        webfetch: "ask", websearch: "allow", external_directory: "deny"
       }
     }
   ' > "$config_tmp"

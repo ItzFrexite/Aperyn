@@ -14,7 +14,7 @@ class StaticContractTests(unittest.TestCase):
             p=Parser(); p.feed(template.read_text(encoding='utf-8'))
             for ref in p.refs: self.assertTrue((ROOT/'chat/static'/ref.removeprefix('/static/')).exists(),f'{template}: {ref}')
     def test_pwa(self):
-        sw=(ROOT/'chat/static/sw.js').read_text(); self.assertIn('aperyn-v1.27.0',sw); self.assertNotIn('22.0.0',sw)
+        sw=(ROOT/'chat/static/sw.js').read_text(); self.assertIn('aperyn-v1.27.1',sw); self.assertNotIn('22.0.0',sw)
         manifest=(ROOT/'chat/static/manifest.webmanifest').read_text(); self.assertIn('icon-192.png',manifest); self.assertIn('icon-512.png',manifest)
     def test_no_legacy_accent(self):
         bad=[]
@@ -92,7 +92,9 @@ class StaticContractTests(unittest.TestCase):
         self.assertFalse((ROOT/'desktop').exists())
         self.assertFalse((ROOT/'DESKTOP_APP.md').exists())
         self.assertFalse((ROOT/'.github/workflows/build-desktop.yml').exists())
-        self.assertIn("ALLOWED = {'dotnet'", runner)
+        self.assertIn("'dotnet', 'cargo'", runner)
+        self.assertIn("'python', 'python3'", runner)
+        self.assertIn("'node', 'npm', 'npx'", runner)
         self.assertNotIn('shell=True', runner)
         self.assertNotIn('AF_INET', runner)
         self.assertIn('AF_UNIX', client)
@@ -121,6 +123,7 @@ class StaticContractTests(unittest.TestCase):
         self.assertIn('thinkingWrap.open=Boolean(opts.thinkingOpen)',script)
         self.assertIn('/static/syntax.js',template)
         self.assertIn('AperynSyntax?.highlight',script)
+        self.assertIn('renameChat',script)
         self.assertIn("return'javascript'",syntax)
         self.assertIn("return'keyword'",syntax)
     def test_github_container_release_contract(self):
@@ -129,9 +132,9 @@ class StaticContractTests(unittest.TestCase):
         workflow=(ROOT/'.github/workflows/publish-container.yml').read_text()
         readme=(ROOT/'README.md').read_text()
         self.assertNotRegex(compose,r'(?m)^\s+build:')
-        self.assertEqual(compose.count('ghcr.io/itzfrexite/aperyn:latest'),2)
+        self.assertEqual(compose.count('ghcr.io/itzfrexite/aperyn-web:latest'),2)
         self.assertEqual(compose.count('pull_policy: always'),3)
-        self.assertIn('ghcr.io/itzfrexite/aperyn-agent:latest',compose)
+        self.assertIn('ghcr.io/itzfrexite/aperyn-agent-runtime:latest',compose)
         agent_service=compose.split('\n  agent:',1)[1]
         self.assertNotRegex(agent_service,r'(?m)^\s+ports:')
         self.assertNotIn('/var/run/docker.sock',compose)
@@ -143,7 +146,7 @@ class StaticContractTests(unittest.TestCase):
         self.assertIn('OPENCODE_MNT_DISPLAY: ${APERYN_AGENT_MNT:-/mnt}',compose)
         self.assertNotIn('--build',launcher)
         self.assertIn("legacy = 'OLLAMA_CONTROL_IMAGE=ollama-control:local'",launcher)
-        self.assertIn("ghcr.io/itzfrexite/aperyn:latest",launcher)
+        self.assertIn("ghcr.io/itzfrexite/aperyn-web:latest",launcher)
         self.assertIn('packages: write',workflow)
         self.assertIn('context: ./chat',workflow)
         self.assertIn('context: ./agent',workflow)
@@ -151,7 +154,7 @@ class StaticContractTests(unittest.TestCase):
         self.assertIn('github.com/ollama-admin/ollama-admin',readme)
     def test_single_current_release_notes(self):
         notes=sorted(ROOT.glob('RELEASE_NOTES*'))
-        self.assertEqual([p.name for p in notes],['RELEASE_NOTES_V1.27.0.md'])
+        self.assertEqual([p.name for p in notes],['RELEASE_NOTES_V1.27.1.md'])
         source='\n'.join(p.read_text() for p in (ROOT/'chat/static').glob('*.css'))
         self.assertNotRegex(source,r'(?<![.\d])v(?:[1-9]|1\d|2[0-3])(?=[^.\d]|$)')
     def test_agent_ui_and_runtime_contract(self):
@@ -168,6 +171,8 @@ class StaticContractTests(unittest.TestCase):
         self.assertIn('/api/agent/workspaces',script)
         self.assertIn('syncAgentViewport',script)
         self.assertIn('--agent-vv-height',style)
+        self.assertIn('renameAgent',script)
+        self.assertIn('websearch: "allow"',runtime)
         self.assertIn('/static/icons/icon-192.png',template)
         self.assertIn('/static/nym.js',template)
         self.assertIn('safe_workspace',gateway)

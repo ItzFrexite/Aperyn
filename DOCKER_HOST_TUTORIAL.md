@@ -15,7 +15,7 @@ cp .env.example .env
 docker compose up -d
 ```
 
-Compose pulls `ghcr.io/itzfrexite/aperyn:latest` and `ghcr.io/itzfrexite/aperyn-agent:latest`, then starts the proxy, WebUI, and private Agent runtime without a local build. The Agent service publishes no host port.
+Compose pulls `ghcr.io/itzfrexite/aperyn-web:latest` and `ghcr.io/itzfrexite/aperyn-agent-runtime:latest`, then starts the proxy, WebUI, and private Agent runtime without a local build. The Agent service publishes no host port.
 
 When `APERYN_AGENT_WORKSPACE` is blank, Compose mounts the current host user's home directory as one Agent boundary. It separately mounts `APERYN_AGENT_MNT` (`/mnt` by default), so root-level mounted projects appear in the picker without exposing host `/`. Set either to an absolute safe parent when projects live elsewhere. Set `APERYN_AGENT_UID` and `APERYN_AGENT_GID` to a non-root host owner with write permission, or use `./ollama-control up` to populate these values automatically on a fresh setup. Do not mount the Docker socket, host root, or system directories.
 

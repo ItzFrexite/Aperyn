@@ -8,7 +8,7 @@ The canonical SVG uses a 64×64 viewBox, a white silhouette, and dark facial neg
 
 ## Signal Glass
 
-Version 1.27.0 calls its visual language **Signal Glass**. Surfaces use controlled translucency, adaptive hairlines, inner highlights, restrained shadows, and soft accent refraction. Text and controls retain strong backing contrast.
+Version 1.27.1 calls its visual language **Signal Glass**. Surfaces use controlled translucency, adaptive hairlines, inner highlights, restrained shadows, and soft accent refraction. Text and controls retain strong backing contrast.
 
 Agent extends the same system with a three-part working canvas: saved-task rail, conversation timeline, and compact live-activity panel. Its hexagonal pulse icon belongs to the same 1.8-stroke monochrome navigation family. The interface was designed for Aperyn and does not reproduce OpenCode's WebUI structure or visual assets.
 

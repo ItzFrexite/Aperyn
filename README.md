@@ -26,7 +26,7 @@ cp .env.example .env
 docker compose up -d
 ```
 
-Compose pulls `ghcr.io/itzfrexite/aperyn:latest`; no local application build is required. Open `http://your-server:15736`. A fresh database starts with `admin` / `password` and requires an immediate password change.
+Compose pulls `ghcr.io/itzfrexite/aperyn-web:latest`; no local application build is required. Open `http://your-server:15736`. A fresh database starts with `admin` / `password` and requires an immediate password change.
 
 For live GPU telemetry and safe global Ollama tuning, use the host launcher once:
 
@@ -56,8 +56,8 @@ Important settings include:
 - `MANAGER_PORT=15736` — WebUI host port.
 - `PROXY_PORT=11435` — Ollama-compatible telemetry proxy.
 - `OLLAMA_API=http://127.0.0.1:11434` — native Ollama upstream.
-- `OLLAMA_CONTROL_IMAGE=ghcr.io/itzfrexite/aperyn:latest` — published image; replace `latest` with a release version to pin it.
-- `APERYN_AGENT_IMAGE=ghcr.io/itzfrexite/aperyn-agent:latest` — private headless Agent runtime image; pin it alongside the WebUI.
+- `OLLAMA_CONTROL_IMAGE=ghcr.io/itzfrexite/aperyn-web:latest` — published image; replace `latest` with a release version to pin it.
+- `APERYN_AGENT_IMAGE=ghcr.io/itzfrexite/aperyn-agent-runtime:latest` — private headless Agent runtime image; pin it alongside the WebUI.
 - `APERYN_AGENT_WORKSPACE=` — optional host-folder boundary. Blank uses the Compose user's home directory, so Agent can browse normal project folders. Set an absolute safe parent for another disk; never use `/` or a directory containing `docker.sock`.
 - `APERYN_AGENT_MNT=/mnt` — second explicit picker root for root-level mounted storage. This grants Agent access to that tree only; it does not mount host `/`.
 - `APERYN_AGENT_CONTEXT_LIMIT=98304` — server-wide Agent context target. Choose 4096–1048576; Aperyn clamps it to the selected model's declared architecture maximum on the next `docker compose up -d`.
@@ -78,7 +78,7 @@ docker compose up -d
 
 ## Publishing and development
 
-Pushes to `main` run the validation suite and publish the multi-architecture `latest` image to GHCR. Tags such as `v1.27.0` also publish immutable version tags. Pull requests run tests without publishing.
+Pushes to `main` run the validation suite and publish the multi-architecture `latest` image to GHCR. Tags such as `v1.27.1` also publish immutable version tags. Pull requests run tests without publishing.
 
 The GitHub Actions workflow uses the repository-scoped `GITHUB_TOKEN` with `contents: read` and `packages: write`. It publishes the WebUI/proxy image and the pinned private Agent runtime image; normal users only pull them.
 

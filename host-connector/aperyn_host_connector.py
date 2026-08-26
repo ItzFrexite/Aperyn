@@ -93,7 +93,7 @@ def snapshot(config):
         pass
     return {'helper': helper, 'gpu': gpu, 'ollama': ollama,
             'system': {'total_bytes': int(mem.get('MemTotal') or 0), 'available_bytes': int(mem.get('MemAvailable') or mem.get('MemFree') or 0), 'cpu_count': os.cpu_count() or 0},
-            'connector_version': '1.27.0'}
+            'connector_version': '1.27.1'}
 
 
 def run_action(config, action):

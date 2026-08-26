@@ -4,7 +4,14 @@ import json, os, socket, subprocess, sys
 from pathlib import Path
 
 CONFIG = Path('/etc/aperyn-host-runner/config.json')
-ALLOWED = {'dotnet','cargo','rustc','java','javac','gcc','g++','cmake','make'}
+# These are direct developer tools only—not a shell or generic host-command
+# API. Additions require a source review and a release, rather than accepting a
+# browser-supplied program name.
+ALLOWED = {
+    'dotnet', 'cargo', 'rustc', 'java', 'javac', 'gcc', 'g++', 'cmake', 'make',
+    'python', 'python3', 'pip', 'pip3', 'node', 'npm', 'npx', 'go', 'ruby',
+    'bundle', 'php', 'composer',
+}
 
 def config():
     data=json.loads(CONFIG.read_text(encoding='utf-8'))

@@ -42,7 +42,7 @@ DATABASE_PATH = os.environ.get('DATABASE_PATH', '/data/ollama-manager.db')
 PROXY_INTERNAL_URL = os.environ.get('PROXY_INTERNAL_URL', 'http://127.0.0.1:11435').rstrip('/')
 PROXY_PUBLIC_PORT = int(os.environ.get('PROXY_PUBLIC_PORT', '11435'))
 MANAGER_LISTEN_PORT = int(os.environ.get('MANAGER_LISTEN_PORT', '3000'))
-APP_VERSION = '1.27.0'
+APP_VERSION = '1.27.1'
 HELPER_TOKEN = os.environ.get('OLLAMA_CONTROL_HELPER_TOKEN', '')
 
 # The session key is generated once in persistent application data. It is never
@@ -3391,7 +3391,7 @@ def chat_stream_v1_9():
                     yield json.dumps(obj) + '\n'
                 external_status = 200
                 return
-            upstream = requests.post(f'{OLLAMA_API}/api/chat', json=payload, stream=True, timeout=3600, headers={'X-Ollama-Control-Client':'WebUI Chat','User-Agent':'Aperyn-WebUI/1.27.0'})
+            upstream = requests.post(f'{OLLAMA_API}/api/chat', json=payload, stream=True, timeout=3600, headers={'X-Ollama-Control-Client':'WebUI Chat','User-Agent':'Aperyn-WebUI/1.27.1'})
             if not upstream.ok:
                 detail = upstream.text or f'Ollama returned HTTP {upstream.status_code}'
                 low_detail = detail.lower()

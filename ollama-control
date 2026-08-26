@@ -10,7 +10,7 @@ p = Path('.env')
 text = p.read_text()
 legacy = 'OLLAMA_CONTROL_IMAGE=ollama-control:local'
 if legacy in text:
-    p.write_text(text.replace(legacy, 'OLLAMA_CONTROL_IMAGE=ghcr.io/itzfrexite/aperyn:latest'))
+    p.write_text(text.replace(legacy, 'OLLAMA_CONTROL_IMAGE=ghcr.io/itzfrexite/aperyn-web:latest'))
     print('Updated the legacy local image setting to the published Aperyn image.')
 PY
 }

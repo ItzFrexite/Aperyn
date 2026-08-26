@@ -15,7 +15,7 @@
 # Real host Ollama (private):   http://127.0.0.1:11434
 services:
   proxy:
-    image: ${OLLAMA_CONTROL_IMAGE:-ghcr.io/itzfrexite/aperyn:latest}
+    image: ${OLLAMA_CONTROL_IMAGE:-ghcr.io/itzfrexite/aperyn-web:latest}
     pull_policy: always
     container_name: aperyn-proxy
     network_mode: host
@@ -38,7 +38,7 @@ services:
       start_period: 5s
 
   chat:
-    image: ${OLLAMA_CONTROL_IMAGE:-ghcr.io/itzfrexite/aperyn:latest}
+    image: ${OLLAMA_CONTROL_IMAGE:-ghcr.io/itzfrexite/aperyn-web:latest}
     pull_policy: always
     container_name: aperyn-web
     ports:
@@ -97,7 +97,7 @@ services:
       start_period: 5s
 
   agent:
-    image: ${APERYN_AGENT_IMAGE:-ghcr.io/itzfrexite/aperyn-agent:latest}
+    image: ${APERYN_AGENT_IMAGE:-ghcr.io/itzfrexite/aperyn-agent-runtime:latest}
     pull_policy: always
     container_name: aperyn-agent
     restart: unless-stopped

@@ -1,10 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
 runner_user=${SUDO_USER:-${USER}}
-workspace=${APERYN_AGENT_WORKSPACE:-/home/$runner_user}
-mnt_root=${APERYN_AGENT_MNT:-/mnt}
+# Read only the two non-secret workspace boundaries from a local .env when it
+# exists. Do not source .env: it can contain connection credentials.
+env_value() { grep -E "^$1=" .env 2>/dev/null | tail -n 1 | cut -d= -f2- || true; }
+workspace=${APERYN_AGENT_WORKSPACE:-$(env_value APERYN_AGENT_WORKSPACE)}
+mnt_root=${APERYN_AGENT_MNT:-$(env_value APERYN_AGENT_MNT)}
+workspace=${workspace:-/home/$runner_user}
+mnt_root=${mnt_root:-/mnt}
 id "$runner_user" >/dev/null
-sudo install -d -m 700 -o "$runner_user" -g "$runner_user" /var/lib/aperyn-host-runner /etc/aperyn-host-runner /usr/local/lib/aperyn-host-runner
+sudo install -d -m 700 -o "$runner_user" -g "$runner_user" /var/lib/aperyn-host-runner
+sudo install -d -m 700 -o root -g root /etc/aperyn-host-runner
+sudo install -d -m 755 -o root -g root /usr/local/lib/aperyn-host-runner
 sudo install -m 755 host-runner/aperyn_host_runner.py /usr/local/lib/aperyn-host-runner/aperyn_host_runner.py
 sudo install -m 644 host-runner/aperyn-host-runner.socket /etc/systemd/system/aperyn-host-runner@.socket
 sudo install -m 644 host-runner/aperyn-host-runner@.service /etc/systemd/system/aperyn-host-runner@.service

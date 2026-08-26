@@ -9,8 +9,10 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: itzfrexite/aperyn
-  AGENT_IMAGE_NAME: itzfrexite/aperyn-agent
+  # New package names deliberately avoid the package ownership inherited by
+  # the archived AperynOLD repository.
+  IMAGE_NAME: itzfrexite/aperyn-web
+  AGENT_IMAGE_NAME: itzfrexite/aperyn-agent-runtime
 
 jobs:
   test:
