@@ -1,0 +1,129 @@
+# Aperyn - recommended deployment for a normal host-installed Ollama.
+#
+# Host Ollama remains OUTSIDE Docker at 127.0.0.1:11434.
+# The telemetry proxy uses host networking so it can reach that loopback-only
+# Ollama service and exposes a drop-in Ollama API on host port 11435.
+#
+# The WebUI uses normal Docker bridge networking and a standard published port:
+#   HOST 15736 -> CONTAINER 3000
+# The optional coding-agent engine is private to the Compose network. Aperyn
+# alone authenticates to it; no OpenCode port is published on the host.
+# Change MANAGER_PORT in .env if you want a different WebUI host port.
+#
+# Dashboard:                    http://HOST:15736
+# Ollama-compatible proxy:      http://HOST:11435
+# Real host Ollama (private):   http://127.0.0.1:11434
+services:
+  proxy:
+    image: ${OLLAMA_CONTROL_IMAGE:-ghcr.io/itzfrexite/aperyn:latest}
+    pull_policy: always
+    container_name: aperyn-proxy
+    network_mode: host
+    command: ["python", "proxy.py"]
+    restart: unless-stopped
+    environment:
+      OLLAMA_API: ${OLLAMA_API:-http://127.0.0.1:11434}
+      DATABASE_PATH: /data/ollama-manager.db
+      OLLAMA_CONTROL_ROLE: proxy
+      PROXY_LISTEN_PORT: ${PROXY_PORT:-11435}
+      OLLAMA_CONTROL_HELPER_TOKEN: ${OLLAMA_CONTROL_HELPER_TOKEN:-}
+      OLLAMA_CONTROL_HELPER_URL: ${OLLAMA_CONTROL_HELPER_URL:-http://127.0.0.1:11436}
+    volumes:
+      - ./data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:${PROXY_PORT:-11435}/__ollama_control/ping >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 12
+      start_period: 5s
+
+  chat:
+    image: ${OLLAMA_CONTROL_IMAGE:-ghcr.io/itzfrexite/aperyn:latest}
+    pull_policy: always
+    container_name: aperyn-web
+    ports:
+      - "${MANAGER_BIND:-0.0.0.0}:${MANAGER_PORT:-15736}:3000"
+    restart: unless-stopped
+    depends_on:
+      proxy:
+        condition: service_healthy
+      agent:
+        # Keep the rest of Aperyn available while Agent initializes or if its
+        # optional runtime needs attention; the Agent page reports that state.
+        condition: service_started
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      # The WebUI reaches Ollama through the observable proxy. This keeps the
+      # host Ollama service private on 127.0.0.1:11434 and means WebUI chat is
+      # included in telemetry too.
+      OLLAMA_API: http://host.docker.internal:${PROXY_PORT:-11435}
+      DEFAULT_OLLAMA_UPSTREAM: ${OLLAMA_API:-http://127.0.0.1:11434}
+      DATABASE_PATH: /data/ollama-manager.db
+      OLLAMA_CONTROL_ROLE: web
+      MANAGER_LISTEN_PORT: 3000
+      PROXY_INTERNAL_URL: http://host.docker.internal:${PROXY_PORT:-11435}
+      PROXY_PUBLIC_PORT: ${PROXY_PORT:-11435}
+      HF_TOKEN: ${HF_TOKEN:-}
+      OLLAMA_CONTROL_HELPER_TOKEN: ${OLLAMA_CONTROL_HELPER_TOKEN:-}
+      OPENCODE_URL: http://agent:4096
+      OPENCODE_USERNAME: aperyn
+      OPENCODE_SECRET_PATH: /data/agent/server.password
+      OPENCODE_WORKSPACE: /workspace
+      # Display the host-side boundary in the folder picker while all path
+      # validation and engine traffic continue to use /workspace internally.
+      OPENCODE_WORKSPACE_DISPLAY: ${APERYN_AGENT_WORKSPACE:-${HOME}}
+      OPENCODE_MNT_WORKSPACE: /mnt
+      OPENCODE_MNT_DISPLAY: ${APERYN_AGENT_MNT:-/mnt}
+      APERYN_AGENT_UID: ${APERYN_AGENT_UID:-1000}
+      APERYN_AGENT_GID: ${APERYN_AGENT_GID:-1000}
+    volumes:
+      - ./models:/models
+      - ./data:/data
+      # Directory picker metadata only; edits happen in the private non-root
+      # Agent container, while the WebUI receives the same boundary read-only.
+      - ${APERYN_AGENT_WORKSPACE:-${HOME}}:/workspace:ro
+      # A second explicit boundary for root-level mounted storage. This does
+      # not expose the host root filesystem or the Docker socket.
+      - ${APERYN_AGENT_MNT:-/mnt}:/mnt:ro
+      # Read-only host memory/sysfs views used for automatic hardware detection.
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:3000/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 12
+      start_period: 5s
+
+  agent:
+    image: ${APERYN_AGENT_IMAGE:-ghcr.io/itzfrexite/aperyn-agent:latest}
+    pull_policy: always
+    container_name: aperyn-agent
+    restart: unless-stopped
+    depends_on:
+      proxy:
+        condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      APERYN_AGENT_UID: ${APERYN_AGENT_UID:-1000}
+      APERYN_AGENT_GID: ${APERYN_AGENT_GID:-1000}
+      APERYN_OLLAMA_TAGS_URL: http://host.docker.internal:${PROXY_PORT:-11435}/api/tags
+      APERYN_OLLAMA_BASE_URL: http://host.docker.internal:${PROXY_PORT:-11435}/v1
+      APERYN_AGENT_CONTEXT_LIMIT: ${APERYN_AGENT_CONTEXT_LIMIT:-98304}
+    volumes:
+      - ./data/agent:/agent-data
+      - ${APERYN_AGENT_WORKSPACE:-${HOME}}:/workspace
+      - ${APERYN_AGENT_MNT:-/mnt}:/mnt
+      # Non-root host SDK runner socket. It is not a Docker socket and only
+      # accepts fixed developer tools within the configured workspace roots.
+      - /var/lib/aperyn-host-runner:/run/aperyn-host-runner
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD-SHELL", "auth=$$(printf 'aperyn:%s' \"$$(cat /agent-data/server.password)\" | base64 | tr -d '\\n'); wget -qO- --header \"Authorization: Basic $$auth\" http://127.0.0.1:4096/global/health >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 4s
+      retries: 18
+      start_period: 15s

@@ -1,0 +1,5 @@
+.message-content .code-block .code-line{display:grid;grid-template-columns:3.5em minmax(0,1fr);min-width:max-content;counter-increment:code-line}
+.message-content .code-block .code-line>i{padding-right:1em;color:#637083;font-style:normal;text-align:right;user-select:none}
+.message-content .code-block .code-line>b{font:inherit;font-weight:inherit;white-space:pre}
+.thinking-picker select{background:var(--panel-2)!important;color:var(--text)!important;color-scheme:dark}
+.thinking-picker select option{background:var(--panel)!important;color:var(--text)!important}

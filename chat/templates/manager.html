@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta name="theme-color" content="#0b0e13"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><link rel="manifest" href="/static/manifest.webmanifest"><link rel="apple-touch-icon" href="/static/icons/icon-192.png"><link rel="icon" href="/static/icons/icon-192.png" type="image/png">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Aperyn</title>
+  <link rel="stylesheet" href="/static/theme.css?v=1.27.0-r1">
+  <link rel="stylesheet" href="/static/manager.css?v=1.27.0-r1">
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar app-sidebar">
+      <div class="brand"><div class="product-mark" aria-hidden="true"><img src="/static/brand/aperyn-mark.svg" alt=""></div><div><strong>Aperyn</strong><span>An Ollama model editor and chat</span></div></div>
+      <nav>
+        <button class="nav-item active" data-view="dashboard"><svg class="nav-icon" aria-hidden="true"><use href="/static/brand/nav-icons.svg#dashboard"></use></svg>Dashboard</button>
+        <button class="nav-item" data-view="models"><svg class="nav-icon" aria-hidden="true"><use href="/static/brand/nav-icons.svg#models"></use></svg>Models</button>
+        <a class="nav-item" href="/chat"><svg class="nav-icon" aria-hidden="true"><use href="/static/brand/nav-icons.svg#chat"></use></svg>Chat</a>
+        {% if current_user and current_user.role == 'admin' %}<a class="nav-item" href="/agent"><svg class="nav-icon" aria-hidden="true"><use href="/static/brand/nav-icons.svg#agent"></use></svg>Agent</a>{% endif %}
+        <a class="nav-item" href="/library"><svg class="nav-icon" aria-hidden="true"><use href="/static/brand/nav-icons.svg#library"></use></svg>Model library</a>
+        <a class="nav-item" href="/storage"><svg class="nav-icon" aria-hidden="true"><use href="/static/brand/nav-icons.svg#storage"></use></svg>Storage</a>
+        <a class="nav-item" href="/downloads"><svg class="nav-icon" aria-hidden="true"><use href="/static/brand/nav-icons.svg#downloads"></use></svg>Downloads</a>
+        <a class="nav-item" href="/converter"><svg class="nav-icon" aria-hidden="true"><use href="/static/brand/nav-icons.svg#converter"></use></svg>Dataset converter</a>
+        <a class="nav-item" href="/settings"><svg class="nav-icon" aria-hidden="true"><use href="/static/brand/nav-icons.svg#settings"></use></svg>Settings</a>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="server-card"><div class="status-dot" id="statusDot"></div><div><b id="serverState">Checking Ollama</b><span id="serverVersion">http://ollama:11434</span></div></div>
+        <div class="proxy-hint"><b>Ollama-compatible proxy</b><code id="proxyUrl">http://localhost:11435</code><small>Use this as your Ollama host in OpenCode and other clients. Normal <code>/api/*</code> paths work unchanged.<br><span id="proxyState">Checking telemetry proxy…</span></small></div>
+      </div>
+    </aside>
+
+    <main class="main app-main">
+      <header class="topbar app-topbar">
+        <div class="topbar-title"><button class="icon-btn mobile-menu" type="button" data-mobile-menu aria-label="Open navigation"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M5 12h14M5 17h14"/></svg></button><img class="topbar-brand-mark" src="/static/brand/aperyn-mark.svg" alt=""><div><h1 id="pageTitle">Dashboard</h1><p id="pageSub">Monitor usage and your active Ollama runtime.</p></div></div>
+        <div class="top-actions"><button class="btn ghost" id="refreshBtn">↻ Refresh</button><button class="btn primary" id="pullBtn"><svg class="ui-icon ui-icon-plus" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span class="desktop-label">Pull model</span></button></div>
+      </header>
+
+      <section class="view active" id="dashboardView">
+        <div class="stats-grid">
+          <article class="stat-card"><span>Requests · 24h</span><strong id="statRequests">0</strong><small>through port 11435 proxy</small></article>
+          <article class="stat-card"><span>Generated tokens · 24h</span><strong id="statTokens">0</strong><small id="statPromptTokens">0 prompt tokens</small></article>
+          <article class="stat-card"><span>Average latency</span><strong id="statLatency">—</strong><small>end-to-end</small></article>
+          <article class="stat-card"><span>Average tokens / second · 24h</span><strong id="statTps">—</strong><small>exact completed generation throughput</small></article>
+        </div>
+        <article class="panel hardware-panel"><div class="panel-head"><div><h2>Hardware</h2><p>Live host RAM and Ollama model VRAM residency</p></div><div class="hardware-head-actions"><span class="pill" id="hardwareSource">Detecting…</span><button class="icon-btn hardware-retry" id="hardwareRetry" type="button" title="Refresh hardware" aria-label="Refresh hardware">↻</button></div></div><div class="hardware-live-grid"><div class="hardware-meter"><div class="hardware-meter-head"><span>GPU / VRAM</span><strong id="gpuUsageText">Detecting…</strong></div><div class="meter-track"><i id="gpuUsageBar"></i></div><small id="gpuUsageSub">Reading GPU information…</small></div><div class="hardware-meter"><div class="hardware-meter-head"><span>System RAM</span><strong id="ramUsageText">Detecting…</strong></div><div class="meter-track"><i id="ramUsageBar"></i></div><small id="ramUsageSub">Reading host memory…</small></div><div class="hardware-mini"><span>Loaded models</span><strong id="hardwareLoadedModels">0</strong><small id="hardwareModelVram">0 B Ollama VRAM</small></div><div class="hardware-mini"><span>CPU</span><strong id="hardwareCpu">—</strong><small>logical threads visible</small></div></div></article>
+        <div class="dashboard-grid">
+          <article class="panel chart-panel"><div class="panel-head"><div><h2>Requests</h2><p>Last 24 hours</p></div><span class="pill">Proxy traffic</span></div><canvas id="requestsChart" height="210"></canvas></article>
+          <article class="panel"><div class="panel-head"><div><h2>Usage by model</h2><p>Requests & generated tokens</p></div></div><div id="modelUsage" class="usage-list empty-state">No proxied requests yet.</div></article>
+        </div>
+        <article class="panel live-panel">
+          <div class="panel-head"><div><h2>Live generation</h2><p>Real-time throughput for requests flowing through the dedicated port 11435 proxy.</p></div><span class="live-badge"><i></i> LIVE</span></div>
+          <div id="liveGenerations" class="live-generations empty-state">No active generation.</div>
+          <div class="live-footnote">During streaming, token count and tok/s are estimates from emitted chunks. When Ollama completes the request, the UI replaces them with exact <code>eval_count ÷ eval_duration</code>.</div>
+        </article>
+        <div class="dashboard-grid lower">
+          <article class="panel"><div class="panel-head"><div><h2>Running now</h2><p>Models currently loaded by Ollama</p></div></div><div id="runningModels" class="running-list empty-state">Nothing loaded.</div></article>
+          <article class="panel"><div class="panel-head"><div><h2>Recent requests</h2><p>Latest observable proxy activity</p></div></div><div id="recentRequests" class="request-list empty-state">No request history.</div></article>
+        </div>
+        {% if current_user and current_user.role == 'admin' %}<div class="dashboard-data-actions dashboard-data-actions-bottom"><div><strong>Dashboard data controls</strong><span>Clear operational request history and completed live summaries without affecting active generations or saved application data.</span></div><button class="btn ghost dashboard-clear" id="openClearTelemetry" type="button">Clear dashboard data</button></div>{% endif %}
+      </section>
+
+      <section class="view" id="modelsView">
+        <div class="models-toolbar"><div class="search-wrap">⌕<input id="modelSearch" placeholder="Search installed models"></div><div class="model-count"><span id="modelCount">0</span> installed</div></div>
+        <div class="models-grid" id="modelsGrid"><div class="loading">Loading models…</div></div>
+      </section>
+    </main>
+  </div>
+  <div class="nav-backdrop" data-nav-close></div>
+
+  <div class="modal-backdrop" id="pullModal">
+    <div class="modal small-modal"><button class="modal-close" data-close="pullModal">×</button><div class="modal-title"><span class="icon-box">↓</span><div><h2>Pull a model</h2><p>Download from the Ollama registry.</p></div></div><label class="field-label">Model name</label><input class="text-input" id="pullModelName" placeholder="e.g. qwen3:8b"><div class="examples">Examples: <button data-model="llama3.2:3b">llama3.2:3b</button><button data-model="qwen3:8b">qwen3:8b</button></div><div id="pullProgressWrap" class="progress-wrap hidden"><div class="progress-track"><div id="pullProgress" class="progress-bar"></div></div><div class="progress-row"><span id="pullStatus">Starting…</span><span id="pullPercent"></span></div></div><div class="modal-actions"><button class="btn ghost" data-close="pullModal">Cancel</button><button class="btn primary" id="startPullBtn">Pull model</button></div></div>
+  </div>
+
+  <div class="modal-backdrop" id="editorModal">
+    <div class="modal editor-modal"><div class="editor-head"><div><div class="eyebrow">MODEL SETTINGS</div><h2 id="editorModelName">Model</h2><p id="editorMeta">Loading model details…</p></div><button class="modal-close" data-close="editorModal">×</button></div>
+      <div class="editor-body">
+        <div class="editor-savebar"><div class="save-name"><label>Save model as</label><input id="targetModelName" class="text-input"></div><div class="save-note">Use the same name to replace the model tag, or a new name to create a tuned variant.</div></div>
+        <div class="ctx-feature"><div class="ctx-copy"><span class="param-badge">Recommended control</span><h3>Context window <code>num_ctx</code></h3><p>Maximum context available to the model. Larger values can use substantially more memory.</p><div class="model-limit-note" id="ctxLimitNote">Model maximum: detecting…</div></div><label class="toggle-line"><input type="checkbox" id="ctxEnabled"><span class="toggle"></span>Enable override</label><div class="ctx-controls"><input type="range" id="ctxRange" min="512" max="1048576" step="512" value="4096"><div class="number-unit"><input type="number" id="ctxNumber" step="512" value="4096" data-min="512" data-max="1048576"><span>tokens</span></div></div><div class="range-ends"><span>512</span><span id="ctxRangeMax">model max</span></div></div><div class="editor-memory-estimate" id="editorMemoryEstimate"><div><span>Estimated GPU at this context</span><strong id="editorGpuEstimate">Calculating…</strong></div><div><span>KV cache</span><strong id="editorKvEstimate">—</strong></div><div><span>Fit</span><strong id="editorFitEstimate">—</strong></div><small id="editorEstimateNote">Uses model metadata and detected VRAM. Estimate only.</small></div>
+        <div class="mtp-feature" id="mtpFeature">
+          <div class="mtp-top">
+            <div class="ctx-copy"><span class="param-badge mtp-badge">Speculative decoding</span><h3>Multi-Token Prediction <code>MTP</code></h3><p>Use embedded MTP / NextN heads when this model contains them. The manager writes Ollama's per-model <code>draft_num_predict</code> depth.</p></div>
+            <label class="toggle-line" id="mtpToggleLine"><input type="checkbox" id="mtpEnabled"><span class="toggle"></span>Enable MTP</label>
+          </div>
+          <div class="mtp-capability"><span id="mtpCapabilityBadge" class="capability-badge unknown">CHECKING</span><div><b id="mtpCapabilityTitle">Checking model capability…</b><p id="mtpCapabilityText">Inspecting verbose Ollama model metadata and tensor names.</p></div></div>
+          <div class="mtp-native" id="mtpNativeStatus"><span class="native-dot"></span><div><b>Checking Ollama MTP runner support…</b><small>Verified native behaviour requires Ollama 0.32.14 or newer.</small></div></div>
+          <div class="mtp-controls" id="mtpControls"><div><label>Maximum draft tokens <code>draft_num_predict</code></label><small>1–8 speculative tokens per cycle. Start with 2 and benchmark.</small></div><input type="range" id="mtpDepthRange" min="1" max="8" step="1" value="2"><div class="number-unit"><input type="number" id="mtpDepthNumber" step="1" value="2" data-min="1" data-max="8"><span>tokens</span></div></div>
+          <div class="mtp-runner-map"><div><span>Ollama model option</span><code>draft_num_predict = <b id="mtpRunnerDepth">2</b></code></div><span class="runner-arrow">→</span><div><span>llama-server on an MTP model</span><code>--spec-type draft-mtp</code><code>--spec-draft-n-max <b id="mtpRunnerDepthFlag">2</b></code></div></div>
+          <div class="mtp-warning" id="mtpWarning"><b>Host service warning</b><span>Remove both global systemd overrides <code>LLAMA_ARG_SPEC_TYPE=draft-mtp</code> and <code>LLAMA_ARG_SPEC_DRAFT_N_MAX=…</code>. Current Ollama can select <code>draft-mtp</code> itself only for models that contain MTP layers; a forced host environment variable bypasses that safety.</span></div>
+          <details class="mtp-evidence" id="mtpEvidenceWrap"><summary>Detection evidence</summary><div id="mtpEvidence">No evidence loaded yet.</div></details>
+        </div>
+        <div class="reasoning-feature" id="reasoningFeature">
+          <div class="reasoning-feature-head"><div class="ctx-copy"><span class="param-badge reasoning-badge">Reasoning</span><h3>Thinking / reasoning controls</h3><p>Auto-detection is used by default. If a custom GGUF exposes different levels, enable a manual per-model override here.</p></div><label class="toggle-line"><input type="checkbox" id="reasoningOverrideEnabled"><span class="toggle"></span>Manual override</label></div>
+          <div class="reasoning-detected"><span class="capability-badge unknown" id="reasoningDetectedBadge">CHECKING</span><div><b id="reasoningDetectedTitle">Detecting model reasoning controls…</b><p id="reasoningDetectedText">Reading the installed chat template and Ollama capabilities.</p></div></div>
+          <details class="reasoning-evidence" id="reasoningEvidenceWrap"><summary>Auto-detection evidence</summary><div id="reasoningEvidence"></div></details>
+          <div class="reasoning-manual" id="reasoningManualControls">
+            <div class="reasoning-levels"><label><input type="checkbox" data-thinking-level="off">Off</label><label><input type="checkbox" data-thinking-level="on">On</label><label><input type="checkbox" data-thinking-level="low">Low</label><label><input type="checkbox" data-thinking-level="medium">Medium</label><label><input type="checkbox" data-thinking-level="high">High</label><label><input type="checkbox" data-thinking-level="xhigh">XHigh</label><label><input type="checkbox" data-thinking-level="max">Max</label></div>
+            <div class="reasoning-manual-grid"><label><span>Control method</span><select id="reasoningMethod"><option value="native">Native Ollama think · XHigh → max</option><option value="xhigh-default">Native think · XHigh uses template default</option><option value="system-directive">System reasoning directive · Muse/custom GGUF</option></select></label><label><span>Default for new chats</span><select id="reasoningDefault"></select></label></div>
+            <div class="reasoning-method-help" id="reasoningMethodHelp"></div>
+          </div>
+        </div>
+        <div class="params-heading"><div><h3>Model parameters</h3><p>Tick a parameter to write that value into the model definition.</p></div><input id="parameterSearch" class="text-input param-search" placeholder="Filter parameters"></div>
+        <div id="parameterGroups"></div>
+      </div>
+      <div class="editor-footer"><div id="saveStatus" class="save-status"></div><div><button class="btn ghost" data-close="editorModal">Cancel</button><button class="btn primary" id="saveModelBtn">Save model</button></div></div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="requestModal"><div class="modal request-modal"><div class="modal-head"><div><span class="eyebrow">REQUEST INSPECTOR</span><h2 id="requestTitle">Request</h2><p id="requestSubtitle">Proxy metadata only; prompt and response bodies are not stored.</p></div><button class="modal-close" data-close="requestModal">×</button></div><div class="request-detail-grid" id="requestDetails"></div></div></div>
+  <div class="modal-backdrop" id="clearTelemetryModal"><div class="modal small-modal clear-telemetry-modal"><button class="modal-close" data-close="clearTelemetryModal">×</button><div class="modal-title"><span class="icon-box clear-icon">⌫</span><div><h2>Clear dashboard data?</h2><p>This removes request totals, charts, model usage, recent requests and completed live summaries.</p></div></div><div class="clear-scope"><b>Kept unchanged</b><span>Active generations, chats, users, themes, models, preferences and application settings.</span></div><div class="modal-actions"><button class="btn ghost" data-close="clearTelemetryModal">Cancel</button><button class="btn dashboard-clear" id="confirmClearTelemetry" type="button">Clear dashboard data</button></div></div></div><div class="toast-wrap" id="toastWrap"></div>
+  <script src="/static/theme.js?v=1.27.0-r1"></script>
+  <script src="/static/brand.js?v=1.27.0-r1"></script>
+  <script src="/static/manager.js?v=1.27.0-r1"></script>
+</body>
+</html>

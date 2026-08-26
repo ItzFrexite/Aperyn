@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+*.log
+.env
+data
+uploads
+logs
+*.db
+*.sqlite*
+*.log
+*.token
+*.secret
+__pycache__
+.pytest_cache
+node_modules
+.git

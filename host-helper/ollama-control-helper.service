@@ -1,0 +1,19 @@
+[Unit]
+Description=Aperyn privileged performance helper
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /usr/local/lib/ollama-control/ollama_control_helper.py
+EnvironmentFile=/etc/ollama-control/helper.env
+Restart=on-failure
+RestartSec=2
+PrivateTmp=true
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+
+[Install]
+WantedBy=multi-user.target

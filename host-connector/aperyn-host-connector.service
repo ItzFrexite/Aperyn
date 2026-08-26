@@ -1,0 +1,18 @@
+[Unit]
+Description=Aperyn outbound Ollama host connector
+After=network-online.target ollama-control-helper.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /usr/local/lib/aperyn-host-connector/aperyn_host_connector.py serve
+Restart=always
+RestartSec=3
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/etc/aperyn-host-connector
+
+[Install]
+WantedBy=multi-user.target
