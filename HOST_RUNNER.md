@@ -9,7 +9,8 @@ generic shell endpoint, or root command execution.
 
 Only fixed executable names and structured arguments are accepted. `/workspace`
 and `/mnt` are mapped to the configured host boundaries and path escapes are
-rejected. The allow-list covers .NET, Python/pip, Node/npm/npx, Rust/Cargo,
+rejected. Its root-owned boundary configuration contains no credentials and is
+read-only to the service user. The allow-list covers .NET, Python/pip, Node/npm/npx, Rust/Cargo,
 Java, GCC/G++, CMake, Make, Go, Ruby/bundle and PHP/composer. Each command
 resolves from the normal Ubuntu user environment.
 

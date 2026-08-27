@@ -10,7 +10,9 @@ workspace=${workspace:-/home/$runner_user}
 mnt_root=${mnt_root:-/mnt}
 id "$runner_user" >/dev/null
 sudo install -d -m 700 -o "$runner_user" -g "$runner_user" /var/lib/aperyn-host-runner
-sudo install -d -m 700 -o root -g root /etc/aperyn-host-runner
+# The boundary configuration contains no credential. The non-root service
+# needs directory traversal to read its root-owned, read-only config file.
+sudo install -d -m 755 -o root -g root /etc/aperyn-host-runner
 sudo install -d -m 755 -o root -g root /usr/local/lib/aperyn-host-runner
 sudo install -m 755 host-runner/aperyn_host_runner.py /usr/local/lib/aperyn-host-runner/aperyn_host_runner.py
 sudo install -m 644 host-runner/aperyn-host-runner@.service /etc/systemd/system/aperyn-host-runner@.service

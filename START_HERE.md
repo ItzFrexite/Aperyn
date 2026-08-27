@@ -1,6 +1,6 @@
-# Start here — Aperyn 1.27.3
+# Start here — Aperyn 1.27.4
 
-Release details: `RELEASE_NOTES_V1.27.3.md`.
+Release details: `RELEASE_NOTES_V1.27.4.md`.
 
 ## Install
 
