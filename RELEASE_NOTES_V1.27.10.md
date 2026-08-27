@@ -1,4 +1,4 @@
-# Aperyn 1.27.9
+# Aperyn 1.27.10
 
 - Fixes Agent workspace browsing for autofs/CIFS-mounted folders such as
   `/mnt/nas/code`. One-way mount propagation keeps late-mounted NAS subfolders

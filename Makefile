@@ -1,14 +1,14 @@
 .PHONY: help setup preflight install-helper install-host-runner uninstall-helper up down restart pull status logs test
 
 help:
-	@echo "Aperyn 1.27.9"
+	@echo "Aperyn 1.27.10"
 	@echo "  make up             Safe preflight, helper repair, and Compose startup"
 	@echo "  make preflight      Validate host Ollama, Docker, ports, and helper"
 	@echo "  make install-helper Install/repair the allow-listed localhost helper"
 	@echo "  make install-host-runner Install/repair the non-root host SDK runner"
 	@echo "  make down           Stop Aperyn (native Ollama is untouched)"
 	@echo "  make status         Show container status"
-	@echo "  make test           Run the 1.27.9 validation suite"
+	@echo "  make test           Run the 1.27.10 validation suite"
 
 setup:
 	@test -f .env || cp .env.example .env
