@@ -5,6 +5,8 @@
 .agent-session-main{display:block;width:100%;min-width:0;max-width:100%;box-sizing:border-box}
 .agent-session-main b,.agent-session-main span{max-width:100%}
 .agent-top-actions #toggleActivity{display:grid;place-items:center;line-height:1}
+.agent-top-actions .activity-arrow{display:none}
+@media(max-width:760px){.agent-top-actions #toggleActivity .activity-arrow{display:block}}
 .tool-card .tool-target{min-width:0;flex:1 1 auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted);font:10px/1.25 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
 .tool-card summary small{flex:0 0 auto}
 .agent-approval-control select{min-width:92px}
