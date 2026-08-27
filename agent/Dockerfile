@@ -13,7 +13,7 @@ COPY entrypoint.sh /usr/local/bin/aperyn-agent-entrypoint
 COPY host-tool /usr/local/lib/aperyn-host-tool
 COPY OPENCODE_LICENSE /licenses/OpenCode-LICENSE
 RUN chmod 0755 /usr/local/bin/aperyn-agent-entrypoint /usr/local/lib/aperyn-host-tool \
-    && for tool in dotnet cargo rustc java javac gcc g++ cmake make python python3 pip pip3 node npm npx go ruby bundle php composer; do ln -s /usr/local/lib/aperyn-host-tool "/usr/local/bin/$tool"; done
+    && for tool in bash sh dotnet cargo rustc java javac gcc g++ cmake make python python3 pip pip3 node npm npx go ruby bundle php composer; do ln -s /usr/local/lib/aperyn-host-tool "/usr/local/bin/$tool"; done
 
 ENV HOME=/agent-data/home \
     XDG_DATA_HOME=/agent-data/xdg-data \

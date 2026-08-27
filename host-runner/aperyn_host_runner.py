@@ -9,6 +9,11 @@ SOCKET_PATH = Path('/var/lib/aperyn-host-runner/runner.sock')
 # API. Additions require a source review and a release, rather than accepting a
 # browser-supplied program name.
 ALLOWED = {
+    # Trusted Host Terminal mode: the Agent invokes the host shell as the
+    # normal configured user, never root.  The cwd containment check below is
+    # still mandatory, so commands cannot escape the selected home or /mnt
+    # boundary through this runner.
+    'bash', 'sh',
     'dotnet', 'cargo', 'rustc', 'java', 'javac', 'gcc', 'g++', 'cmake', 'make',
     'python', 'python3', 'pip', 'pip3', 'node', 'npm', 'npx', 'go', 'ruby',
     'bundle', 'php', 'composer',
