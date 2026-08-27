@@ -80,7 +80,7 @@ case "$command" in
     test -f .env || cp .env.example .env
     ensure_published_image
     prepare_agent_runtime
-    if ! systemctl is-active --quiet "aperyn-host-runner@${USER}.socket" 2>/dev/null; then
+    if ! systemctl is-active --quiet "aperyn-host-runner@${USER}.service" 2>/dev/null; then
       echo "Installing or repairing the non-root Aperyn Host Runner."
       bash scripts/install-host-runner.sh
     fi

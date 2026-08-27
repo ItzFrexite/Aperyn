@@ -22,7 +22,7 @@ sudo chown root:root /etc/aperyn-host-runner/config.json
 # This file only records non-secret path boundaries; the service user must be
 # able to read it, while the root-owned directory prevents modification.
 sudo chmod 644 /etc/aperyn-host-runner/config.json
-sudo systemctl disable --now "aperyn-host-runner@${runner_user}.socket" 2>/dev/null || true
+sudo systemctl disable --now "aperyn-host-runner@${runner_user}.socket" >/dev/null 2>&1 || true
 sudo systemctl daemon-reload
 sudo systemctl reset-failed "aperyn-host-runner@${runner_user}.service" || true
 sudo systemctl enable --now "aperyn-host-runner@${runner_user}.service"

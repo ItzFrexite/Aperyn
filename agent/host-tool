@@ -2,7 +2,15 @@
 """Container-side client for a fixed Aperyn Host Runner tool."""
 import json, os, socket, sys
 program=os.path.basename(sys.argv[0])
-request={'program':program,'args':sys.argv[1:],'cwd':os.getcwd(),'timeout':900}
+# OpenCode itself starts in /workspace, but a direct diagnostic such as
+# `docker exec aperyn-agent dotnet --version` starts in the image workdir.
+# That image-only path has no host equivalent. Treat it as the configured
+# workspace root; the host runner still rejects any path outside /workspace
+# and /mnt and never receives arbitrary host paths.
+cwd=os.getcwd()
+if cwd != '/workspace' and not cwd.startswith('/workspace/') and cwd != '/mnt' and not cwd.startswith('/mnt/'):
+    cwd='/workspace'
+request={'program':program,'args':sys.argv[1:],'cwd':cwd,'timeout':900}
 try:
     sock=socket.socket(socket.AF_UNIX); sock.settimeout(905); sock.connect('/run/aperyn-host-runner/runner.sock'); sock.sendall(json.dumps(request).encode()); sock.shutdown(socket.SHUT_WR)
     response=json.loads(b''.join(iter(lambda:sock.recv(65536),b'')).decode())

@@ -13,3 +13,6 @@ ReadWritePaths=/var/lib/aperyn-host-runner
 RestrictAddressFamilies=AF_UNIX
 Restart=on-failure
 RestartSec=2
+
+[Install]
+WantedBy=multi-user.target
