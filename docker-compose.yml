@@ -85,7 +85,10 @@ services:
       - ${APERYN_AGENT_WORKSPACE:-${HOME}}:/workspace:ro
       # A second explicit boundary for root-level mounted storage. This does
       # not expose the host root filesystem or the Docker socket.
-      - ${APERYN_AGENT_MNT:-/mnt}:/mnt:ro
+      # rslave keeps autofs/CIFS submounts (for example /mnt/nas/code) visible
+      # after the WebUI container starts, without allowing mount changes back
+      # onto the host.
+      - ${APERYN_AGENT_MNT:-/mnt}:/mnt:ro,rslave
       # Read-only host memory/sysfs views used for automatic hardware detection.
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
@@ -115,7 +118,8 @@ services:
     volumes:
       - ./data/agent:/agent-data
       - ${APERYN_AGENT_WORKSPACE:-${HOME}}:/workspace
-      - ${APERYN_AGENT_MNT:-/mnt}:/mnt
+      # Same one-way mount propagation for Agent tasks on autofs-backed NAS.
+      - ${APERYN_AGENT_MNT:-/mnt}:/mnt:rslave
       # Non-root host SDK runner socket. It is not a Docker socket and only
       # accepts fixed developer tools within the configured workspace roots.
       - /var/lib/aperyn-host-runner:/run/aperyn-host-runner

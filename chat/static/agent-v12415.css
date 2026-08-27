@@ -16,4 +16,4 @@
    land at exactly the same divider and row positions on desktop. */
 .agent-side-bottom .nav-icon{width:17px;height:17px;flex-basis:17px}
 @media(min-width:761px){.agent-side-bottom a{min-height:43px;padding:10px 12px;border-radius:14px}}
-@media(max-width:760px){.agent-approval-control,#agentNotifications{display:none!important}.workspace-control::after{content:none!important}.workspace-control .workspace-folder-icon{display:block}}
+@media(max-width:760px){.agent-approval-control{display:flex!important;min-width:0;max-width:98px;padding:0 5px!important}.agent-approval-control select{min-width:0!important;width:100%;font-size:12px}.agent-controls label:not(.agent-approval-control):last-of-type{max-width:86px}.agent-controls label:not(.agent-approval-control):last-of-type select{font-size:12px}.agent-controls .agent-approval-control>span{display:none}.agent-controls{gap:4px}.agent-controls label{padding:0 5px}.agent-approval-control,#agentNotifications{display:flex}.workspace-control::after{content:none!important}.workspace-control .workspace-folder-icon{display:block}}
